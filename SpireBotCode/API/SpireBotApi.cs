@@ -6,9 +6,9 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 
-namespace SpireBot.SpireBotCode.Extensions;
+namespace SpireBot.SpireBotCode.API;
 
-public class SpireBotAPI
+public class SpireBotApi
 {
     private HttpClient _client = new HttpClient()
     {
@@ -16,46 +16,6 @@ public class SpireBotAPI
     };
     
     public record ContextResponse(string Context);
-
-    public record EnergyCostRecord(
-        bool CostsX,
-        int Canonical
-    );
-    
-    //TODO: Add rest of game state and probably refactor this
-    public record CardRecord(
-        string Id,
-        string Type,
-        EnergyCostRecord EnergyCost,
-        string TargetType,
-        IEnumerable<String> Keywords,
-        IEnumerable<String> Tags,
-        //DynamicVarSet DynamicVars,
-        //EnchantmentModel? Enchantment,
-        //AfflictionModel? Affliction,
-        bool IsUpgraded,
-        int BaseReplayCount,
-        bool ShouldRetainThisTurn,
-        bool IsSlyThisTurn,
-        bool GainsBlock,
-        string OrbEvokeType,
-        bool ExhaustOnNextPlay,
-        int CurrentStarCost
-    );
-    
-
-    public record GameState(
-        int CurrentHp,
-        int MaxHp,
-        int MaxEnergy,
-        int Gold,
-        int PotionsSlotCount,
-        int OrbSlotCount,
-        
-        IEnumerable<CardRecord> DrawPile,
-        IEnumerable<CardRecord> DiscardPile,
-        IEnumerable<CardRecord> ExhaustPile
-    );
     
     private async Task<HttpResponseMessage> MakeRequestAsync(PlayerChoiceContext choiceContext, Player player)
     {
@@ -71,7 +31,7 @@ public class SpireBotAPI
         {
             HttpResponseMessage response = await MakeRequestAsync(choiceContext, player);
             ContextResponse? responseObject = await response.Content.ReadFromJsonAsync<ContextResponse>();
-            MainFile.Logger.Info(responseObject?.Context);
+            MainFile.Logger.Info(responseObject?.Context ?? "");
         }
         catch (HttpRequestException e)
         {
@@ -82,6 +42,16 @@ public class SpireBotAPI
 
     private CardRecord ConstructCardRecord(CardModel card)
     {
+        Dictionary<string, DynamicVarRecord> dynamicVars = new Dictionary<string, DynamicVarRecord>();
+        foreach (KeyValuePair<string, DynamicVar> kvp in card.DynamicVars)
+        {
+            string key = kvp.Key;
+            DynamicVar dynamicVar = kvp.Value;
+            
+            DynamicVarRecord dynamicVarRecord = new DynamicVarRecord(dynamicVar.Name, dynamicVar.BaseValue);
+            dynamicVars.Add(key, dynamicVarRecord);
+        }
+        
         return new CardRecord(
             card.Id.ToString(),
             card.Type.ToString(),
@@ -89,9 +59,9 @@ public class SpireBotAPI
             card.TargetType.ToString(),
             card.Keywords.Select(k => k.ToString()),
             card.Tags.Select(k => k.ToString()),
-            //card.DynamicVars,
-            //card.Enchantment,
-            //card.Affliction,
+            dynamicVars,
+            card.Enchantment?.ToSerializable(),
+            card.Affliction?.GetType().Name,
             card.IsUpgraded,
             card.BaseReplayCount,
             card.ShouldRetainThisTurn,
@@ -106,9 +76,10 @@ public class SpireBotAPI
     private GameState ConstructGameState(Player player)
     {
         
-        List<CardRecord> DrawPile = new();
-        List<CardRecord> DiscardPile = new();
-        List<CardRecord> ExhaustPile = new();
+        List<CardRecord> drawPile = [];
+        List<CardRecord> discardPile = [];
+        List<CardRecord> exhaustPile = [];
+        List<CardRecord> handPile = [];
 
         foreach (CardPile item in player.Piles ?? Array.Empty<CardPile>())
         {
@@ -117,19 +88,25 @@ public class SpireBotAPI
                 case PileType.Draw:
                     foreach (CardModel card in item.Cards)
                     {
-                        DrawPile.Add(ConstructCardRecord(card));
+                        drawPile.Add(ConstructCardRecord(card));
                     }
                     break;
                 case PileType.Discard:
                     foreach (CardModel card in item.Cards)
                     {
-                        DiscardPile.Add(ConstructCardRecord(card));
+                        discardPile.Add(ConstructCardRecord(card));
                     }
                     break;
                 case PileType.Exhaust:
                     foreach (CardModel card in item.Cards)
                     {
-                        ExhaustPile.Add(ConstructCardRecord(card));
+                        exhaustPile.Add(ConstructCardRecord(card));
+                    }
+                    break;
+                case PileType.Hand:
+                    foreach (CardModel card in item.Cards)
+                    {
+                        handPile.Add(ConstructCardRecord(card));
                     }
                     break;
             }
@@ -142,9 +119,10 @@ public class SpireBotAPI
             player.Gold,
             player.MaxPotionCount,
             player.BaseOrbSlotCount,
-            DrawPile, 
-            DiscardPile, 
-            ExhaustPile
+            drawPile, 
+            discardPile, 
+            exhaustPile,
+            handPile
         );
     }
 }

@@ -13,7 +13,7 @@ using MegaCrit.Sts2.Core.Random;
 using MegaCrit.Sts2.Core.TestSupport;
 
 using SpireBot.SpireBotCode.Relics;
-using SpireBot.SpireBotCode.Extensions;
+using SpireBot.SpireBotCode.API;
 
 namespace SpireBot.SpireBotCode.Relics;
 
@@ -23,7 +23,7 @@ public class SpireBotBot() : SpireBotRelic
     public override RelicRarity Rarity =>
         RelicRarity.Starter;
     
-    private SpireBotAPI _api = new  SpireBotAPI();
+    private SpireBotApi _api = new  SpireBotApi();
     
     public override async Task AfterAutoPrePlayPhaseEnteredLate(PlayerChoiceContext choiceContext, Player player)
     {
