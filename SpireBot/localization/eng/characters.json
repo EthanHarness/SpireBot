@@ -1,0 +1,16 @@
+{
+  "SPIREBOT-SPIRE_BOT.aromaPrinciple": "Lore",
+  "SPIREBOT-SPIRE_BOT.banter.alive.endTurnPing": "Co-op hurry up end turn ping message",
+  "SPIREBOT-SPIRE_BOT.banter.dead.endTurnPing": "...",
+  "SPIREBOT-SPIRE_BOT.cardsModifierDescription": "__ cards will now appear in rewards and shops.",
+  "SPIREBOT-SPIRE_BOT.cardsModifierTitle": "__ Cards",
+  "SPIREBOT-SPIRE_BOT.description": "Character Selection\nScreen Description",
+  "SPIREBOT-SPIRE_BOT.eventDeathPrevention": "Co-op survival line",
+  "SPIREBOT-SPIRE_BOT.goldMonologue": "Line spoken when obtaining a large amount of gold",
+  "SPIREBOT-SPIRE_BOT.possessiveAdjective": "his/her/its",
+  "SPIREBOT-SPIRE_BOT.pronounObject": "him/her/it",
+  "SPIREBOT-SPIRE_BOT.pronounPossessive": "his/hers/its",
+  "SPIREBOT-SPIRE_BOT.pronounSubject": "he/she/it",
+  "SPIREBOT-SPIRE_BOT.title": "The SpireBot",
+  "SPIREBOT-SPIRE_BOT.titleObject": "The SpireBot"
+}
