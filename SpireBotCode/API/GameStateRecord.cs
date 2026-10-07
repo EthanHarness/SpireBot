@@ -11,5 +11,8 @@ public record GameState(
     IEnumerable<CardRecord> DrawPile,
     IEnumerable<CardRecord> DiscardPile,
     IEnumerable<CardRecord> ExhaustPile,
-    IEnumerable<CardRecord> HandPile
+    IEnumerable<CardRecord> HandPile,
+    
+    IEnumerable<RelicRecord> Relics,
+    IEnumerable<PotionRecord> Potions
 );

@@ -2,5 +2,5 @@
 
 public record EnergyCostRecord(
     bool CostsX,
-    int Canonical
+    int Cost
 );

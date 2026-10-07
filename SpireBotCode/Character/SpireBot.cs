@@ -11,6 +11,7 @@ using SpireBot.SpireBotCode.Relics;
 
 namespace SpireBot.SpireBotCode.Character;
 
+//TODO: Bug with _character. I think restarting the game causes _character to change which affects potions generated. 
 public class SpireBot : PlaceholderCharacterModel
 {
     public const string CharacterId = "SpireBot";

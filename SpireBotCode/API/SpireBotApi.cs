@@ -55,7 +55,7 @@ public class SpireBotApi
         return new CardRecord(
             card.Id.ToString(),
             card.Type.ToString(),
-            new EnergyCostRecord(card.EnergyCost.CostsX, card.EnergyCost.Canonical),
+            new EnergyCostRecord(card.EnergyCost.CostsX, card.EnergyCost.GetWithModifiers(CostModifiers.Global)),
             card.TargetType.ToString(),
             card.Keywords.Select(k => k.ToString()),
             card.Tags.Select(k => k.ToString()),
@@ -73,9 +73,59 @@ public class SpireBotApi
         );
     }
 
+    private RelicRecord ConstructRelicRecord(RelicModel relic)
+    {
+        Dictionary<string, DynamicVarRecord> dynamicVars = new Dictionary<string, DynamicVarRecord>();
+        foreach (KeyValuePair<string, DynamicVar> kvp in relic.DynamicVars)
+        {
+            string key = kvp.Key;
+            DynamicVar dynamicVar = kvp.Value;
+            
+            DynamicVarRecord dynamicVarRecord = new DynamicVarRecord(dynamicVar.Name, dynamicVar.BaseValue);
+            dynamicVars.Add(key, dynamicVarRecord);
+        }
+        
+        return new RelicRecord(
+            relic.Id.ToString(),
+            relic.Status.ToString(),
+            relic.IsTradable,
+            relic.IsUsedUp,
+            relic.ShowCounter,
+            relic.DisplayAmount,
+            relic.IsWax,
+            relic.IsMelted,
+            relic.HasBeenRemovedFromState,
+            dynamicVars
+        );
+    }
+
+    private PotionRecord ConstructPotionRecord(PotionModel potion)
+    {
+        Dictionary<string, DynamicVarRecord> dynamicVars = new Dictionary<string, DynamicVarRecord>();
+        foreach (KeyValuePair<string, DynamicVar> kvp in potion.DynamicVars)
+        {
+            string key = kvp.Key;
+            DynamicVar dynamicVar = kvp.Value;
+            
+            DynamicVarRecord dynamicVarRecord = new DynamicVarRecord(dynamicVar.Name, dynamicVar.BaseValue);
+            dynamicVars.Add(key, dynamicVarRecord);
+        }
+
+        return new PotionRecord(
+            potion.Id.ToString(),
+            potion.Usage.ToString(),
+            potion.Rarity.ToString(),
+            potion.TargetType.ToString(),
+            potion.HasBeenRemovedFromState,
+            dynamicVars
+        );
+    }
+
     private GameState ConstructGameState(Player player)
     {
+        MainFile.Logger.Info(player.Character.CardPool.AllCardIds.ElementAt(0).ToString());
         
+        //Constructs Pile Cards
         List<CardRecord> drawPile = [];
         List<CardRecord> discardPile = [];
         List<CardRecord> exhaustPile = [];
@@ -110,7 +160,21 @@ public class SpireBotApi
                     }
                     break;
             }
-        } 
+        }
+        
+        //Constructs Player Relic Records
+        List<RelicRecord> playerRelics = [];
+        foreach (RelicModel relic in player.Relics ?? Array.Empty<RelicModel>())
+        {
+            playerRelics.Add(ConstructRelicRecord(relic));
+        }
+        
+        //Constructs Player Potion Records
+        List<PotionRecord> playerPotions = [];
+        foreach (PotionModel potion in player.Potions ?? Array.Empty<PotionModel>())
+        {
+            playerPotions.Add(ConstructPotionRecord(potion));
+        }
 
         return new GameState(
             player.Creature.CurrentHp,
@@ -122,7 +186,9 @@ public class SpireBotApi
             drawPile, 
             discardPile, 
             exhaustPile,
-            handPile
+            handPile,
+            playerRelics,
+            playerPotions
         );
     }
 }
