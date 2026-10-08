@@ -2,12 +2,9 @@
 using BaseLib.Utils.NodeFactories;
 using SpireBot.SpireBotCode.Extensions;
 using Godot;
-using HarmonyLib;
 using MegaCrit.Sts2.Core.Entities.Characters;
-using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Characters;
-using SpireBot.SpireBotCode.Relics;
 
 namespace SpireBot.SpireBotCode.Character;
 
@@ -15,37 +12,14 @@ namespace SpireBot.SpireBotCode.Character;
 public class SpireBot : PlaceholderCharacterModel
 {
     public const string CharacterId = "SpireBot";
-
-    private CharacterModel _character;
-    private IReadOnlyList<RelicModel> _relicWrapper;
-    
-    private static CharacterModel set_character()
-    {
-        var random = new Random();
-        return random.Next(1, 6) switch
-        {
-            1 => ModelDb.Character<Ironclad>(),
-            2 => ModelDb.Character<Silent>(),
-            3 => ModelDb.Character<Regent>(),
-            4 => ModelDb.Character<Necrobinder>(),
-            5 => ModelDb.Character<Defect>(),
-            _ => ModelDb.Character<Regent>()
-        };
-    }
-    
-    public SpireBot()
-    {
-       _character = set_character();
-       _relicWrapper = [.. _character.StartingRelics, ModelDb.Relic<SpireBotBot>()];
-    }
-    public override Color NameColor => _character.NameColor;
-    public override CharacterGender Gender => _character.Gender;
-    public override int StartingHp => _character.StartingHp;
-    public override IEnumerable<CardModel> StartingDeck => _character.StartingDeck;
-    public override IReadOnlyList<RelicModel> StartingRelics => _relicWrapper;
-    public override CardPoolModel CardPool => _character.CardPool;
-    public override RelicPoolModel RelicPool => _character.RelicPool;
-    public override PotionPoolModel PotionPool => _character.PotionPool;
+    public override Color NameColor => ModelDb.Character<Ironclad>().NameColor;
+    public override CharacterGender Gender => CharacterGender.Neutral;
+    public override int StartingHp => 1;
+    public override IEnumerable<CardModel> StartingDeck => ModelDb.Character<Ironclad>().StartingDeck;
+    public override IReadOnlyList<RelicModel> StartingRelics => ModelDb.Character<Ironclad>().StartingRelics;
+    public override CardPoolModel CardPool => ModelDb.Character<Ironclad>().CardPool;
+    public override RelicPoolModel RelicPool => ModelDb.Character<Ironclad>().RelicPool;
+    public override PotionPoolModel PotionPool => ModelDb.Character<Ironclad>().PotionPool;
     
     public static readonly Color Color = new("ffffff");
 
@@ -67,14 +41,5 @@ public class SpireBot : PlaceholderCharacterModel
     public override string CustomCharacterSelectIconPath => "char_select_char_name.png".CharacterUiPath();
     public override string CustomCharacterSelectLockedIconPath => "char_select_char_name_locked.png".CharacterUiPath();
     public override string CustomMapMarkerPath => "map_marker_char_name.png".CharacterUiPath();
-
-    public override string CharacterSelectSfx
-    {
-        get
-        {
-            _character = set_character();
-            _relicWrapper = [.. _character.StartingRelics, ModelDb.Relic<SpireBotBot>()];
-            return $"event:/sfx/characters/{this.PlaceholderID}/{this.PlaceholderID}_select";
-        } 
-    }
+    public override string CharacterSelectSfx => $"event:/sfx/characters/{this.PlaceholderID}/{this.PlaceholderID}_select";
 }

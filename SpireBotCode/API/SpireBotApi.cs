@@ -123,8 +123,6 @@ public class SpireBotApi
 
     private GameState ConstructGameState(Player player)
     {
-        MainFile.Logger.Info(player.Character.CardPool.AllCardIds.ElementAt(0).ToString());
-        
         //Constructs Pile Cards
         List<CardRecord> drawPile = [];
         List<CardRecord> discardPile = [];
